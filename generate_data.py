@@ -1,0 +1,64 @@
+import pandas as pd
+import numpy as np
+import random
+# Set a seed so we all get the same "random" data
+np.random.seed(42)
+random.seed(42)
+#--- Define our factory parameters ---
+machines=['Machine_A','Machine_B','Machine_C','Machine_D']
+shifts=['Morning','Afternoon','Night']
+downtime_reasons=['Mechanical Failure','Setup & Changeover','No Material','Operator Absence','Planned Maintenance']
+
+#--- Generate 6 months of daily data---
+dates=pd.date_range(start='2024-01-01',end='2024-06-30',freq='D')
+rows=[]
+for date in dates:
+    for machine in machines:
+        for shift in shifts:
+            planned_time=480 #minutes per shift (8 hours)
+            #Downtime is random between 10 and 120 minutes
+            downtime=random.randint(10,120)
+            run_time=planned_time-downtime
+
+            #Availability
+            availability=run_time/planned_time
+
+            #Performance (how fast vs ideal speed)
+            perfromance=round(random.uniform(0.65,1.0),2)
+
+            #Quality (good parts ratio)
+            quality=round(random.uniform(0.8,1.0),2)
+
+            #OEE
+            oee=round(availability*perfromance*quality,4)
+
+            #Total parts and goo parts
+            total_parts=int(run_time*random.uniform(1.5, 3.0))
+            good_parts=int(total_parts*quality)
+
+            #Random downtime reason
+            reason = random.choice(downtime_reasons)
+
+            rows.append({
+                'date':date,
+                'machine':machine,
+                'shift':shift,
+                'planned_time_min':planned_time,
+                'downtime_min':downtime,
+                'run_time_min':run_time,
+                'availability':availability,
+                'performance':perfromance,
+                'quality':quality,
+                'oee':oee,
+                'total_parts':total_parts,
+                'good_parts':good_parts,
+                'downtime_reason':reason
+            })
+
+            #--- Create DataFrame and save---
+            df=pd.DataFrame(rows)
+            df.to_csv('oee_data.csv',index=False)
+
+            print("Dataset created successfully!")
+            print(f"Shape:{df.shape}")
+            print(df.head())
