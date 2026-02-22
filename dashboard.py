@@ -17,9 +17,13 @@ st.set_page_config(
 # ======================
 
 def load_default_data():
-    df = pd.read_csv('oee_data.csv')
-    df['date'] = pd.to_datetime(df['date'])
-    return df
+    try:
+        df = pd.read_csv('oee_data.csv')
+        df['date'] = pd.to_datetime(df['date'])
+        return df
+    except FileNotFoundError:
+        st.error("⚠️ Default dataset not found. Please upload your OEE data file using the uploader in the sidebar.")
+        st.stop()
 
 def load_uploaded_file(uploaded_file):
     # Detect if CSV or Excel and load accordingly
