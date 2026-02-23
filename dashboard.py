@@ -55,11 +55,33 @@ def load_uploaded_file(uploaded_file):
 # --- Upload widget in sidebar ---
 st.sidebar.header("📂 Data Source")
 
-uploaded_file = st.sidebar.file_uploader(
-    "Upload your OEE data (CSV or Excel)",
-    type=['csv', 'xlsx', 'xls'],
-    help="File must contain the standard OEE columns"
-)
+# Password gate for upload
+UPLOAD_PASSWORD = "oee2024"  # change this to whatever you want
+
+with st.sidebar.expander("🔐 Upload Access"):
+    entered_password = st.text_input(
+        "Enter access code",
+        type="password",
+        placeholder="••••••••"
+    )
+    
+    if entered_password == UPLOAD_PASSWORD:
+        st.success("✅ Access granted")
+       
+        # Template download only visible after auth
+        template_df = pd.read_csv('oee_data.csv').head(5)
+        template_csv = template_df.to_csv(index=False).encode('utf-8')
+        st.download_button(
+            label="⬇️ Download Template",
+            data=template_csv,
+            file_name='oee_template.csv',
+            mime='text/csv'
+        )
+    elif entered_password != "":
+        st.error("❌ Incorrect access code")
+        uploaded_file = None
+    else:
+        uploaded_file = None
 
 if uploaded_file is not None:
     df, message = load_uploaded_file(uploaded_file)
